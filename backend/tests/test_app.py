@@ -1,12 +1,3 @@
-
-import sys
-from pathlib import Path
-
-sys.path.insert(
-    0,
-    str(Path(__file__).resolve().parents[1])
-)
-
 import pytest
 from app import app
 
@@ -23,6 +14,7 @@ def test_hello(client):
     response = client.get("/api/hello")
 
     assert response.status_code == 200
+    assert response.json["message"] == "Hello from Python Flask!"
     assert response.json["service"] == "flask-backend"
 
 
@@ -45,4 +37,3 @@ def test_readiness(client):
 
     assert response.status_code == 200
     assert response.json["status"] == "ready"
-
