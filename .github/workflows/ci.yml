@@ -9,6 +9,7 @@ on:
   push:
     branches:
       - main
+      - feature/add-secure-ci
 
   workflow_dispatch:
 
@@ -48,8 +49,10 @@ jobs:
       - name: Ruff formatting
         run: ruff format --check backend/
 
+
       - name: Run Python tests
-        run: pytest -v
+        working-directory: backend
+        run: python -m pytest -v
 
   image-security:
     name: Image Security
