@@ -1,0 +1,94 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>DevOps Mini Shop</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f5f7fb;
+            margin: 0;
+            padding: 40px 20px;
+            text-align: center;
+            color: #243047;
+        }
+
+        .card {
+            max-width: 620px;
+            margin: 30px auto;
+            background: white;
+            padding: 28px;
+            border-radius: 12px;
+            box-shadow: 0 5px 20px #00000012;
+        }
+
+        button {
+            background: #2563eb;
+            color: white;
+            border: 0;
+            padding: 12px 20px;
+            border-radius: 7px;
+            cursor: pointer;
+        }
+
+        li {
+            text-align: left;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="card">
+        <h1>DevOps Mini Shop</h1>
+        <p>Nginx + Python Flask + Docker</p>
+
+        <button onclick="loadProducts()">
+            Load Products
+        </button>
+
+        <ul id="products"></ul>
+        <p id="status"></p>
+    </div>
+
+    <script>
+        async function loadProducts() {
+            const status = document.getElementById("status");
+            const list = document.getElementById("products");
+
+            status.textContent = "Loading...";
+            list.replaceChildren();
+
+            try {
+                const response = await fetch("/api/products");
+
+                if (!response.ok) {
+                    throw new Error("API returned an error");
+                }
+
+                const data = await response.json();
+
+                data.products.forEach(product => {
+                    const item = document.createElement("li");
+
+                    item.textContent =
+                        `${product.name} - Rs. ${product.price}`;
+
+                    list.appendChild(item);
+                });
+
+                status.textContent = "Products loaded successfully!";
+            } catch (error) {
+                status.textContent = "Could not load products.";
+                console.error(error);
+            }
+        }
+    </script>
+</body>
+</html>
+
