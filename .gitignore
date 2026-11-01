@@ -28,3 +28,7 @@ credentials.json
 
 # OS
 .DS_Store
+# Vim temporary files
+*.swp
+*.swo
+*~
