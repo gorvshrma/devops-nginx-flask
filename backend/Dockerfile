@@ -1,28 +1,38 @@
-
-FROM python:3.13-slim
-
-ENV PYTHONDONTWRITEBYTECODE=1 \
-    PYTHONUNBUFFERED=1
+# Stage 1: Build dependencies
+FROM cgr.dev/chainguard/python:latest-dev AS builder
 
 WORKDIR /app
 
-RUN groupadd --system appgroup \
-    && useradd --system --gid appgroup appuser
-
+# Copy requirements before installing dependencies
 COPY requirements.txt .
 
-RUN pip install --no-cache-dir -r requirements.txt
+# Create virtual environment and install dependencies
+RUN python -m venv /app/venv \
+    && /app/venv/bin/pip install --no-cache-dir -r requirements.txt \
+    && rm -rf /app/venv/lib/python*/site-packages/pip \
+              /app/venv/lib/python*/site-packages/pip-*.dist-info
 
-COPY --chown=appuser:appgroup app.py .
+# Stage 2: Minimal production runtime
+FROM cgr.dev/chainguard/python:latest
 
-USER appuser
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PATH="/app/venv/bin:$PATH"
+
+WORKDIR /app
+
+COPY --from=builder /app/venv /app/venv
+COPY app.py /app/app.py
+
+USER 65532:65532
 
 EXPOSE 5000
 
-CMD ["gunicorn", \
+ENTRYPOINT ["/app/venv/bin/python"]
+
+CMD ["-m", "gunicorn", \
      "--bind", "0.0.0.0:5000", \
      "--workers", "2", \
      "--access-logfile", "-", \
      "--error-logfile", "-", \
      "app:app"]
-
